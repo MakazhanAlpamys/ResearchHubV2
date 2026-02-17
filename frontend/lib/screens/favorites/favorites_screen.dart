@@ -112,7 +112,7 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
               );
             },
             loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
+            error: (_, _) => const SizedBox.shrink(),
           ),
           // Favorites list
           Expanded(

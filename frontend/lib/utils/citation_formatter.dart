@@ -41,7 +41,7 @@ class CitationFormatter {
         ? paper.authors.first.split(' ').last.toLowerCase()
         : 'unknown';
     final year = paper.year.isNotEmpty ? paper.year : 'nd';
-    return '${first}$year';
+    return '$first$year';
   }
 
   static String _apaAuthors(List<String> authors) {

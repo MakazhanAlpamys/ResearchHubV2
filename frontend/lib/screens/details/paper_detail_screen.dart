@@ -147,9 +147,10 @@ class _PaperDetailScreenState extends ConsumerState<PaperDetailScreen> {
     );
   }
 
-  void _showMoveToCollection() async {
+  Future<void> _showMoveToCollection() async {
     final collectionId = await _pickCollection();
     // null returned from sheet = "All Favorites" or dismissed
+    if (!mounted) return;
     final l10n = AppLocalizations.of(context);
     try {
       await ref
