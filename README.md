@@ -24,7 +24,7 @@
 ### Шаг 1. Клонирование репозитория
 
 ```bash
-git clone <URL_РЕПОЗИТОРИЯ>
+git clone https://github.com/MakazhanAlpamys/ResearchHubV2.git
 cd ResearchHubV2
 ```
 
