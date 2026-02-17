@@ -12,7 +12,7 @@ from app.models.paper import Paper, PaperSearchResult, SourceStatus
 
 logger = logging.getLogger(__name__)
 
-_ARXIV_API = "http://export.arxiv.org/api/query"
+_ARXIV_API = "https://export.arxiv.org/api/query"
 _OPENALEX_API = "https://api.openalex.org/works"
 _SEM_SCHOLAR_API = "https://api.semanticscholar.org/graph/v1/paper/search"
 

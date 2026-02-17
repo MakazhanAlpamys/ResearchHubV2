@@ -41,7 +41,8 @@ async def require_auth(
         )
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token has expired")
-    except jwt.InvalidTokenError:
+    except jwt.InvalidTokenError as e:
+        logger.warning("JWT validation failed: %s", e)
         raise HTTPException(status_code=401, detail="Invalid token")
 
     user_id: str | None = payload.get("sub")

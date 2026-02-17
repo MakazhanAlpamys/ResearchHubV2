@@ -89,7 +89,9 @@ class _PaperDetailScreenState extends ConsumerState<PaperDetailScreen> {
           );
         }
       } else {
-        await notifier.add(widget.paper);
+        // Show collection picker when adding
+        final collectionId = await _pickCollection();
+        await notifier.add(widget.paper, collectionId: collectionId);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(l10n.addedToFavorites)),
@@ -104,6 +106,66 @@ class _PaperDetailScreenState extends ConsumerState<PaperDetailScreen> {
       }
     } finally {
       if (mounted) setState(() => _favBusy = false);
+    }
+  }
+
+  Future<String?> _pickCollection() async {
+    final collections =
+        ref.read(collectionsProvider).valueOrNull ?? [];
+    if (collections.isEmpty) return null;
+
+    final l10n = AppLocalizations.of(context);
+    return showModalBottomSheet<String?>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
+              child: Text(l10n.moveToCollection,
+                  style: Theme.of(ctx).textTheme.titleMedium),
+            ),
+            ListTile(
+              leading: const Icon(Icons.inbox_outlined),
+              title: Text(l10n.allFavorites),
+              onTap: () => Navigator.pop(ctx, null),
+            ),
+            for (final col in collections)
+              ListTile(
+                leading: const Icon(Icons.folder_outlined),
+                title: Text(col.name),
+                onTap: () => Navigator.pop(ctx, col.id),
+              ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showMoveToCollection() async {
+    final collectionId = await _pickCollection();
+    // null returned from sheet = "All Favorites" or dismissed
+    final l10n = AppLocalizations.of(context);
+    try {
+      await ref
+          .read(favoritesProvider.notifier)
+          .moveToCollection(widget.paper.paperId, collectionId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.addedToFavorites)),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.error)),
+        );
+      }
     }
   }
 
@@ -144,13 +206,57 @@ class _PaperDetailScreenState extends ConsumerState<PaperDetailScreen> {
             ),
           // Citation export
           PopupMenuButton<String>(
-            icon: const Icon(Icons.format_quote),
-            tooltip: l10n.copyCitation,
-            onSelected: (format) => _copyCitation(format),
-            itemBuilder: (_) => const [
-              PopupMenuItem(value: 'bibtex', child: Text('BibTeX')),
-              PopupMenuItem(value: 'apa', child: Text('APA')),
-              PopupMenuItem(value: 'mla', child: Text('MLA')),
+            icon: const Icon(Icons.more_vert),
+            onSelected: (value) {
+              if (value == 'move_collection') {
+                _showMoveToCollection();
+              } else {
+                _copyCitation(value);
+              }
+            },
+            itemBuilder: (_) => [
+              if (isFav)
+                PopupMenuItem(
+                  value: 'move_collection',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.folder_outlined, size: 20),
+                      const SizedBox(width: 8),
+                      Text(l10n.moveToCollection),
+                    ],
+                  ),
+                ),
+              if (isFav) const PopupMenuDivider(),
+              PopupMenuItem(
+                value: 'bibtex',
+                child: Row(
+                  children: [
+                    const Icon(Icons.format_quote, size: 20),
+                    const SizedBox(width: 8),
+                    const Text('BibTeX'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'apa',
+                child: Row(
+                  children: [
+                    const Icon(Icons.format_quote, size: 20),
+                    const SizedBox(width: 8),
+                    const Text('APA'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'mla',
+                child: Row(
+                  children: [
+                    const Icon(Icons.format_quote, size: 20),
+                    const SizedBox(width: 8),
+                    const Text('MLA'),
+                  ],
+                ),
+              ),
             ],
           ),
         ],
