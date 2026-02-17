@@ -1,0 +1,29 @@
+name: frontend
+description: "ResearchHubV2 – Scientific paper search & AI summarization."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  flutter_riverpod: ^2.6.1
+  supabase_flutter: ^2.8.0
+  dio: ^5.7.0
+  url_launcher: ^6.3.1
+  intl: ^0.20.2
+  flutter_markdown: ^0.7.6
+  shared_preferences: ^2.5.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
