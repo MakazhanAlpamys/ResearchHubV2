@@ -7,6 +7,11 @@ build/
 venv/
 .env
 
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
 # Flutter
 frontend/.dart_tool/
 frontend/.packages

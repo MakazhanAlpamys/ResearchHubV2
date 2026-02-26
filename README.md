@@ -181,20 +181,116 @@ flutter run -d emulator-5554
 
 ---
 
+## Docker
+
+Бэкенд можно запустить через Docker, не устанавливая Python и зависимости вручную.
+
+### Предварительные требования
+
+- [Docker](https://docs.docker.com/get-docker/) и [Docker Compose](https://docs.docker.com/compose/install/) установлены
+- Файл `backend/.env` заполнен реальными ключами (см. Шаг 4.4)
+
+### Запуск
+
+```bash
+# Из корня проекта
+docker compose up --build
+```
+
+Бэкенд будет доступен по адресу: **http://localhost:8000**
+
+### Остановка
+
+```bash
+docker compose down
+```
+
+### Пересборка после изменений кода
+
+```bash
+docker compose up --build
+```
+
+> **Примечание:** Docker-контейнер содержит только бэкенд. Фронтенд (Flutter) запускается отдельно, Supabase используется как облачный сервис.
+
+---
+
+## Тестирование
+
+### Backend (pytest)
+
+```bash
+cd backend
+
+# Установи зависимости для тестов
+pip install -r requirements-test.txt
+
+# Запусти все тесты
+pytest
+
+# Запусти с подробным выводом
+pytest -v
+
+# Запусти конкретный файл
+pytest tests/test_health.py
+```
+
+> Тесты бэкенда не требуют реальных API-ключей — все внешние сервисы замокированы.
+
+| Файл | Что тестирует | Кол-во |
+|------|---------------|--------|
+| `test_health.py` | Эндпоинт `/health` | 1 |
+| `test_models.py` | Pydantic-модели (сериализация) | 12 |
+| `test_papers_router.py` | Поиск статей (моки API) | 5 |
+| `test_ai_router.py` | AI-эндпоинты + авторизация | 12 |
+| `test_paper_aggregator.py` | Агрегатор (дедупликация, ошибки) | 8 |
+| `test_dependencies.py` | JWT-верификация | 6 |
+| **Итого** | | **44** |
+
+### Frontend (Flutter)
+
+```bash
+cd frontend
+
+# Запусти все тесты
+flutter test
+
+# Запусти конкретный файл
+flutter test test/models/paper_test.dart
+
+# Статический анализ
+flutter analyze
+```
+
+---
+
 ## Структура проекта
 
 ```
 ResearchHubV2/
 ├── .gitignore
 ├── README.md
+├── docker-compose.yml          # Docker Compose (бэкенд)
 ├── supabase/
-│   └── schema.sql               # SQL-схема (profiles, favorites, collections, RLS)
-│   └── drop_all.sql               # drop all
+│   ├── schema.sql              # SQL-схема (profiles, favorites, collections, RLS)
+│   └── drop_all.sql            # drop all
 ├── backend/
-│   ├── main.py                  # FastAPI — точка входа
-│   ├── requirements.txt         # Python-зависимости
-│   ├── .env.example             # Шаблон переменных окружения
-│   ├── .env                     # Реальные ключи (НЕ коммитить!)
+│   ├── main.py                 # FastAPI — точка входа
+│   ├── requirements.txt        # Python-зависимости
+│   ├── requirements-test.txt   # Зависимости для тестов (pytest)
+│   ├── Dockerfile              # Docker-образ для бэкенда
+│   ├── .dockerignore           # Исключения для Docker
+│   ├── pytest.ini              # Конфигурация pytest
+│   ├── .env.example            # Шаблон переменных окружения
+│   ├── .env                    # Реальные ключи (НЕ коммитить!)
+│   ├── tests/
+│   │   ├── conftest.py             # Фикстуры: TestClient, JWT, моки
+│   │   ├── test_health.py          # Тест /health
+│   │   ├── test_models.py          # Тесты Pydantic-моделей
+│   │   ├── test_papers_router.py   # Тесты поиска статей
+│   │   ├── test_ai_router.py       # Тесты AI-эндпоинтов + авторизация
+│   │   ├── test_paper_aggregator.py # Тесты агрегатора (мок HTTP)
+│   │   └── test_dependencies.py    # Тесты JWT-верификации
 │   └── app/
 │       ├── config.py            # Загрузка настроек из .env
 │       ├── dependencies.py      # JWT-аутентификация (Supabase токены)
